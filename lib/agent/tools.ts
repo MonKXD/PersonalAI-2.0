@@ -5,6 +5,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase-admin";
+import { createEvent, listEvents, summarizeInbox } from "./google-tools";
 
 export const TIMEZONE = "Asia/Kolkata";
 
@@ -77,6 +78,44 @@ export const TOOL_DEFINITIONS: Anthropic.ToolUnion[] = [
     input_schema: {
       type: "object",
       properties: { days: { type: "integer", minimum: 1, maximum: 90, description: "Defaults to 7" } },
+    },
+  },
+  {
+    name: "summarize_inbox",
+    description:
+      "Read Harsh's Gmail (read-only) and return recent emails (sender, subject, snippet). Defaults to unread inbox mail. Summarise the result aloud briefly. Use Gmail search syntax in query, e.g. 'from:amazon newer_than:2d'.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Gmail search query. Default: is:unread in:inbox" },
+        max_results: { type: "integer", minimum: 1, maximum: 15, description: "Defaults to 8" },
+      },
+    },
+  },
+  {
+    name: "list_events",
+    description: "List Google Calendar events starting now (or from a given time) for the next N days.",
+    input_schema: {
+      type: "object",
+      properties: {
+        days: { type: "integer", minimum: 1, maximum: 30, description: "Defaults to 1 (today onward)" },
+        from_iso: { type: "string", description: "ISO 8601 start, e.g. 2026-10-05T00:00:00+05:30. Defaults to now." },
+      },
+    },
+  },
+  {
+    name: "create_event",
+    description: "Create a Google Calendar event. Resolve relative dates ('tomorrow 5pm') using the current IST time first.",
+    input_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        start_iso: { type: "string", description: "ISO 8601 date-time in IST, e.g. 2026-10-05T18:00:00+05:30" },
+        duration_minutes: { type: "integer", description: "Defaults to 60" },
+        location: { type: "string" },
+        description: { type: "string" },
+      },
+      required: ["title", "start_iso"],
     },
   },
   {
@@ -264,6 +303,15 @@ export async function executeTool(name: string, input: Input, ctx: ToolContext):
       await match.ref.update({ done: true, completedAt: FieldValue.serverTimestamp() });
       return { completed: match.data().title };
     }
+
+    case "summarize_inbox":
+      return summarizeInbox(ctx.uid, input);
+
+    case "list_events":
+      return listEvents(ctx.uid, input);
+
+    case "create_event":
+      return createEvent(ctx.uid, input);
 
     case "get_study_overview": {
       const [examsSnap, topicsSnap] = await Promise.all([col(ctx.uid, "exams").get(), col(ctx.uid, "topics").get()]);

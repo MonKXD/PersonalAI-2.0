@@ -1,6 +1,6 @@
 # Personal AI Agent — build status
 
-Last updated: 2026-10-02
+Last updated: 2026-10-02 (session 2)
 
 Full app regenerated as one cumulative project (replaces the earlier scaffold + separate voice kit).
 `npm install && npm run build` verified clean on Next.js 14.2.35.
@@ -14,10 +14,12 @@ Full app regenerated as one cumulative project (replaces the earlier scaffold + 
 4. **News digest — done.** `/news`, topic chips + custom topic, **live web search** via `/api/agent`.
 5. **Voice assistant — done.** `/assistant`, Free + Premium voice (switchable), conversation mode,
    12 tools (web search, money, wellness, tasks, study overview, memories, device actions).
-6. **Gmail + Calendar (Google OAuth) — not started.**
+6. **Gmail + Calendar (Google OAuth) — built, untested with real keys.** Server-side OAuth (`lib/google.ts`, `/api/google/{connect,callback,status}`), refresh token stored in `users/{uid}/private/google` (client access blocked in `firestore.rules`). Tools: `summarize_inbox` (read-only), `list_events`, `create_event`. Connect button in Talk → Settings.
 7. **Jobs/internships API (Adzuna/Jooble) — not started** (voice web_search covers lookups for now).
 
 ## Needs Harsh (one-time)
+- Google Cloud: enable Gmail API + Calendar API, add OAuth consent test user, add redirect URIs `http://localhost:3000/api/google/callback` and `https://<vercel-domain>/api/google/callback`; set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET in `.env.local` and Vercel.
+- Re-deploy `firestore.rules` (changed: `private` collection is now server-only).
 - Fill `.env.local` (Firebase web config, Firebase Admin service account, Anthropic key, optional OpenAI key).
 - Enable Google sign-in in Firebase Auth; deploy `firestore.rules`.
 - Add the same env vars on Vercel; add the Vercel domain to Firebase Authorized domains.

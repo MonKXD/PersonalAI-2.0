@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
+import GoogleConnect from "@/components/GoogleConnect";
 import { useVoice, type VoiceEngine } from "@/lib/voice/useVoice";
 
 type ClientAction =
@@ -33,6 +34,9 @@ const TOOL_LABELS: Record<string, string> = {
   forget_fact: "forgot",
   device_action: "device action",
   get_current_datetime: "checked time",
+  summarize_inbox: "checked Gmail",
+  list_events: "checked calendar",
+  create_event: "added calendar event",
 };
 
 const SUGGESTIONS = [
@@ -252,6 +256,7 @@ export default function VoiceAssistant() {
               </p>
             )}
           </div>
+          <GoogleConnect getToken={getToken} />
           <label className="flex items-center justify-between">
             <span>Conversation mode (keep listening after replies)</span>
             <input type="checkbox" className="h-5 w-5 accent-teal-500" checked={conversationMode} onChange={(e) => setConversationMode(e.target.checked)} />

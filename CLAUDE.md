@@ -45,6 +45,8 @@ lib/
   firebase-admin.ts        Server Admin SDK + Firebase ID-token verification
   agent/tools.ts           ALL voice-agent abilities: schemas + executors
   agent/run-agent.ts       Claude tool-use loop + voice-style system prompt
+  google.ts                Server Google OAuth (Gmail read-only + Calendar), token refresh, googleApi()
+  agent/google-tools.ts    Gmail/Calendar tool executors
   voice/useVoice.ts        Free (Web Speech) / Premium (OpenAI) listen + speak hook
 ```
 
@@ -74,7 +76,7 @@ If you change a field, change it in BOTH `lib/data.ts` (+ pages) and `lib/agent/
 ### Voice agent tools (lib/agent/tools.ts)
 web_search (Anthropic server tool, Mumbai) · get_current_datetime · log_money · log_wellness ·
 get_money_summary · add_task · list_tasks · complete_task · get_study_overview · remember_fact ·
-forget_fact · device_action (open_website, youtube, maps, whatsapp, call, timer).
+forget_fact · summarize_inbox · list_events · create_event · device_action (open_website, youtube, maps, whatsapp, call, timer).
 
 **To add a tool:** schema in `TOOL_DEFINITIONS`, a `case` in `executeTool()`, a label in `TOOL_LABELS`
 in `components/VoiceAssistant.tsx`, then build. Slash command: `/add-agent-tool`.
@@ -83,7 +85,7 @@ in `components/VoiceAssistant.tsx`, then build. Slash command: `/add-agent-tool`
 NEXT_PUBLIC_FIREBASE_* (client) · FIREBASE_ADMIN_PROJECT_ID / _CLIENT_EMAIL / _PRIVATE_KEY (server) ·
 ANTHROPIC_API_KEY · ANTHROPIC_MODEL (optional, default `claude-sonnet-4-5`; set the newest Sonnet ID from
 https://docs.claude.com/en/docs/about-claude/models/overview) · OPENAI_API_KEY (premium voice only) ·
-optional OPENAI_STT_MODEL / OPENAI_TTS_MODEL / OPENAI_TTS_VOICE · optional TTS_PROVIDER=elevenlabs +
+optional OPENAI_STT_MODEL / OPENAI_TTS_MODEL / OPENAI_TTS_VOICE · GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (Gmail+Calendar) · optional TTS_PROVIDER=elevenlabs +
 ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID.
 
 ## Honest limits (tell Harsh if he asks)
@@ -93,7 +95,7 @@ ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID.
 - Mic needs HTTPS (Vercel) or localhost. Timers/reminders only alert while the app is open.
 
 ## Roadmap
-1. Google OAuth (Gmail + Calendar) → tools `summarize_inbox`, `list_events`, `create_event`.
+1. ~~Google OAuth (Gmail + Calendar)~~ — done (needs real-key testing).
 2. Jobs: Adzuna/Jooble API → `search_openings` tool + a /jobs page (web_search covers lookups for now).
 3. Push notifications (FCM) so reminders/timers fire when the app is closed.
 4. Streaming replies (speak the first sentence while the rest generates) for lower latency.
